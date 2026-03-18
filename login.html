@@ -14,9 +14,10 @@
   --mono:'Share Tech Mono',monospace;--head:'Orbitron',sans-serif;--body:'Exo 2',sans-serif;
   --glow-cyan:0 0 14px #00E5FF50,0 0 40px #00E5FF20;
   --glow-neon:0 0 10px #39FF1450,0 0 25px #39FF1420;
+  --glow-amber:0 0 10px #FFB30050;
 }
 html,body{background:var(--void);color:var(--t1);font-family:var(--body);min-height:100vh;
-  display:flex;align-items:center;justify-content:center;overflow:hidden}
+  display:flex;align-items:center;justify-content:center;padding:16px;overflow-x:hidden}
 .grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:linear-gradient(rgba(0,229,255,.04) 1px,transparent 1px),
     linear-gradient(90deg,rgba(0,229,255,.04) 1px,transparent 1px);
@@ -26,8 +27,8 @@ html,body{background:var(--void);color:var(--t1);font-family:var(--body);min-hei
 @keyframes holo{0%{background-position:-200% center}100%{background-position:200% center}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes slide-up{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slide-down{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .holo{background:linear-gradient(90deg,var(--cyan),#fff,var(--cyan2),var(--cyan));
   background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;animation:holo 4s linear infinite}
@@ -36,176 +37,332 @@ html,body{background:var(--void);color:var(--t1);font-family:var(--body);min-hei
 .hex-ring .r1{border-top-color:var(--cyan);border-right-color:var(--cyan);animation:rotate-slow 3s linear infinite;opacity:.7}
 .hex-ring .r2{inset:6px;border-bottom-color:var(--cyan);border-left-color:var(--cyan);animation:rotate-ccw 2s linear infinite;opacity:.4}
 .hex-ring .ri{position:relative;z-index:1}
-.card{position:relative;z-index:1;width:100%;max-width:340px;padding:32px 28px;
-  background:rgba(10,32,53,.8);backdrop-filter:blur(20px);
-  border:1px solid rgba(0,229,255,.18);border-radius:14px;
-  animation:slide-up .5s ease;display:flex;flex-direction:column;gap:20px}
-.card::before,.card::after{content:'';position:absolute;width:14px;height:14px;z-index:2}
-.card::before{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
-.card::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+.card{position:relative;z-index:1;width:100%;max-width:340px;
+  animation:slide-up .5s ease;display:flex;flex-direction:column;gap:0}
+/* Login panel */
+.login-panel{padding:28px 26px;background:rgba(10,32,53,.85);backdrop-filter:blur(20px);
+  border:1px solid rgba(0,229,255,.18);border-radius:14px 14px 0 0;display:flex;flex-direction:column;gap:18px}
+.login-panel::before,.login-panel::after{content:'';position:absolute;width:14px;height:14px;z-index:2}
+.login-panel::before{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+/* Config panel */
+.cfg-panel{overflow:hidden;max-height:0;transition:max-height .35s cubic-bezier(.4,0,.2,1);
+  background:rgba(7,18,32,.9);backdrop-filter:blur(16px);
+  border:1px solid rgba(255,179,0,.2);border-top:none;border-radius:0 0 14px 14px}
+.cfg-panel.open{max-height:280px}
+.cfg-inner{padding:16px 20px;display:flex;flex-direction:column;gap:11px}
+/* Footer */
+.card-footer{display:flex;align-items:center;justify-content:center;margin-top:10px}
 .field{display:flex;flex-direction:column;gap:6px}
 .field label{font-family:var(--mono);font-size:9px;color:var(--dim);letter-spacing:.1em}
 .field input{background:rgba(7,24,40,.9);border:1px solid rgba(0,229,255,.2);border-radius:6px;
   color:var(--t1);padding:12px 14px;font-family:var(--mono);font-size:14px;outline:none;
   transition:border-color .2s,box-shadow .2s;width:100%}
 .field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,229,255,.1)}
-.field input.err{border-color:var(--red) !important;box-shadow:0 0 0 3px rgba(255,23,68,.1) !important}
+.field input.err{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(255,23,68,.1)!important}
 .btn-login{width:100%;padding:15px;background:var(--cyan);color:var(--void);border:none;
   border-radius:8px;font-family:var(--head);font-size:13px;font-weight:700;letter-spacing:.1em;
-  cursor:pointer;transition:all .2s;box-shadow:var(--glow-cyan);
-  clip-path:polygon(9px 0%,calc(100% - 9px) 0%,100% 9px,100% calc(100% - 9px),calc(100% - 9px) 100%,9px 100%,0% calc(100% - 9px),0% 9px)}
+  cursor:pointer;transition:all .2s;box-shadow:var(--glow-cyan);}
 .btn-login:hover{background:#fff;transform:translateY(-2px)}
-.btn-login:disabled{background:var(--dim);box-shadow:none;cursor:default;transform:none;opacity:.6}
+.btn-login:disabled{background:var(--dim);box-shadow:none;cursor:default;transform:none}
+.btn-cfg-toggle{width:100%;padding:10px 14px;background:transparent;
+  border:1px solid rgba(255,179,0,.25);border-radius:8px;color:var(--amber);
+  font-family:var(--mono);font-size:10px;cursor:pointer;transition:all .18s;
+  display:flex;align-items:center;justify-content:center;gap:8px;letter-spacing:.06em}
+.btn-cfg-toggle:hover{background:rgba(255,179,0,.08);border-color:rgba(255,179,0,.5)}
+.btn-cfg-save{width:100%;padding:11px;background:var(--amber);color:#1a0f00;border:none;
+  border-radius:6px;font-family:var(--head);font-size:11px;font-weight:700;letter-spacing:.08em;
+  cursor:pointer;transition:all .18s;box-shadow:var(--glow-amber)}
+.btn-cfg-save:hover{background:#ffd040}
 #error-msg{display:none;padding:10px 13px;background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.3);
-  border-radius:6px;font-family:var(--mono);font-size:10px;color:var(--red);text-align:center;line-height:1.5}
+  border-radius:6px;font-family:var(--mono);font-size:10px;color:var(--red);text-align:center;line-height:1.6}
+#cfg-saved-msg{display:none;padding:8px 12px;background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.25);
+  border-radius:5px;font-family:var(--mono);font-size:9px;color:var(--neon);text-align:center}
 .spinner{display:none;width:20px;height:20px;border-radius:50%;border:2px solid rgba(0,229,255,.2);
   border-top-color:var(--cyan);animation:spin .8s linear infinite;margin:0 auto}
-.role-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;
-  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em}
-.role-oficial{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.3)}
-.role-admin{background:rgba(224,64,251,.1);color:var(--violet);border:1px solid rgba(224,64,251,.3)}
-.role-supervisor{background:rgba(255,179,0,.1);color:var(--amber);border:1px solid rgba(255,179,0,.3)}
+.status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;flex-shrink:0}
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
-
-<!-- Ambient glow -->
 <div style="position:fixed;top:30%;left:20%;width:300px;height:300px;border-radius:50%;
   background:radial-gradient(circle,rgba(0,229,255,.06) 0%,transparent 70%);pointer-events:none"></div>
 <div style="position:fixed;bottom:25%;right:15%;width:250px;height:250px;border-radius:50%;
   background:radial-gradient(circle,rgba(224,64,251,.05) 0%,transparent 70%);pointer-events:none"></div>
 
 <div class="card">
-  <!-- Logo -->
-  <div style="text-align:center">
-    <div class="hex-ring" style="width:80px;height:80px;margin:0 auto 16px">
-      <div class="r1"></div><div class="r2"></div>
-      <div class="ri" style="font-size:30px;animation:float 4s ease-in-out infinite">✈</div>
+
+  <!-- ── LOGIN PANEL ─────────────────────────────────────── -->
+  <div class="login-panel">
+
+    <!-- Logo -->
+    <div style="text-align:center">
+      <div class="hex-ring" style="width:76px;height:76px;margin:0 auto 14px">
+        <div class="r1"></div><div class="r2"></div>
+        <div class="ri" style="font-size:28px;animation:float 4s ease-in-out infinite">✈</div>
+      </div>
+      <div class="holo" style="font-family:var(--head);font-size:32px;font-weight:900;letter-spacing:.12em;line-height:1">AVSEC PRO</div>
+      <div style="font-family:var(--head);font-size:10px;color:var(--cyan2);letter-spacing:.22em;margin-top:5px">SEGURIDAD AERONÁUTICA · SJO</div>
     </div>
-    <div class="holo" style="font-family:var(--head);font-size:34px;font-weight:900;letter-spacing:.12em;line-height:1">AVSEC PRO</div>
-    <div style="font-family:var(--head);font-size:10px;color:var(--cyan2);letter-spacing:.22em;margin-top:6px">SEGURIDAD AERONÁUTICA · SJO</div>
+
+    <!-- Script status indicator -->
+    <div id="script-status-bar" style="display:flex;align-items:center;gap:8px;padding:8px 12px;
+      border-radius:6px;background:rgba(0,0,0,.25);border:1px solid rgba(0,229,255,.08)">
+      <span class="status-dot" id="status-dot" style="background:var(--dim)"></span>
+      <span id="status-text" style="font-family:var(--mono);font-size:9px;color:var(--dim);flex:1">Verificando configuración...</span>
+    </div>
+
+    <!-- Credentials form -->
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="field">
+        <label>USUARIO</label>
+        <input id="inp-user" type="text" placeholder="usuario" autocomplete="username" autocapitalize="none"
+          onkeydown="if(event.key==='Enter')document.getElementById('inp-pass').focus()"/>
+      </div>
+      <div class="field">
+        <label>CONTRASEÑA</label>
+        <div style="position:relative">
+          <input id="inp-pass" type="password" placeholder="••••••••" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding-right:44px"/>
+          <button onclick="togglePass()"
+            style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;
+              border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:4px">👁</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="error-msg"></div>
+    <div class="spinner" id="spinner"></div>
+
+    <button class="btn-login" id="login-btn" onclick="doLogin()">⬡ INGRESAR</button>
+
+    <!-- Config toggle -->
+    <button class="btn-cfg-toggle" id="cfg-toggle-btn" onclick="toggleConfig()">
+      <span id="cfg-toggle-icon">⚙</span>
+      <span id="cfg-toggle-text">CONFIGURAR APPS SCRIPT</span>
+    </button>
   </div>
 
-  <!-- Form -->
-  <div style="display:flex;flex-direction:column;gap:14px">
-    <div class="field">
-      <label>USUARIO</label>
-      <input id="inp-user" type="text" placeholder="usuario@sjo" autocomplete="username" autocapitalize="none"
-        onkeydown="if(event.key==='Enter')$('inp-pass').focus()"/>
-    </div>
-    <div class="field">
-      <label>CONTRASEÑA</label>
-      <div style="position:relative">
-        <input id="inp-pass" type="password" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')doLogin()" style="width:100%;padding-right:44px"/>
-        <button onclick="togglePass()" id="eye-btn"
-          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--dim);cursor:pointer;font-size:15px;padding:4px">👁</button>
+  <!-- ── CONFIG PANEL (collapsible) ────────────────────────── -->
+  <div class="cfg-panel" id="cfg-panel">
+    <div class="cfg-inner">
+      <div style="font-family:var(--head);font-size:10px;color:var(--amber);letter-spacing:.1em;margin-bottom:2px">
+        🔗 APPS SCRIPT — LOGIN
+      </div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--dim);line-height:1.7;margin-bottom:4px">
+        Pegue la URL del Apps Script desplegado en el Google Sheet
+        <span style="color:var(--amber)">AVSEC-Login</span>.<br>
+        Se guarda localmente en este dispositivo.
+      </div>
+      <div class="field">
+        <label>URL DEL APPS SCRIPT</label>
+        <input id="cfg-script-url" type="url"
+          placeholder="https://script.google.com/macros/s/.../exec"
+          style="font-size:11px;padding:9px 12px;border-color:rgba(255,179,0,.3);
+            background:rgba(255,179,0,.04)"/>
+      </div>
+      <div id="cfg-saved-msg">✓ URL guardada — recargando...</div>
+      <button class="btn-cfg-save" onclick="saveConfig()">💾 GUARDAR Y APLICAR</button>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;line-height:1.6">
+        Sin URL configurada puede usar las credenciales demo:<br>
+        <span style="color:var(--cyan)">admin / admin123</span> &nbsp;·&nbsp;
+        <span style="color:var(--cyan)">oficial / oficial123</span>
       </div>
     </div>
   </div>
 
-  <div id="error-msg"></div>
-  <div class="spinner" id="spinner"></div>
-
-  <button class="btn-login" id="login-btn" onclick="doLogin()">⬡ INGRESAR</button>
-
-  <div style="font-family:var(--mono);font-size:8px;color:var(--dim);text-align:center;letter-spacing:.06em">
-    AEROPUERTO INTERNACIONAL JUAN SANTAMARÍA · MROC<br>Sistema de Gestión de Seguridad Aeroportuaria
+  <!-- Footer -->
+  <div class="card-footer">
+    <div style="font-family:var(--mono);font-size:7px;color:var(--dim);text-align:center;
+      letter-spacing:.05em;margin-top:10px;line-height:1.8">
+      AEROPUERTO INTERNACIONAL JUAN SANTAMARÍA · MROC<br>
+      Sistema de Gestión de Seguridad Aeroportuaria
+    </div>
   </div>
+
 </div>
 
 <script>
-const SCRIPT_URL = localStorage.getItem("avsec_apps_script") || "";
+// ── Config ────────────────────────────────────────────────────
+let LOGIN_SCRIPT_URL = localStorage.getItem("avsec_login_script") ||
+                       localStorage.getItem("avsec_apps_script")  || "";
 
 function $(id){ return document.getElementById(id); }
 
+// ── Status indicator ──────────────────────────────────────────
+function updateStatusBar() {
+  const dot  = $("status-dot");
+  const text = $("status-text");
+  if(!dot||!text) return;
+  if(LOGIN_SCRIPT_URL) {
+    dot.style.background  = "var(--neon)";
+    dot.style.boxShadow   = "0 0 6px var(--neon)";
+    text.style.color      = "var(--neon)";
+    text.textContent      = "✓ Apps Script configurado";
+  } else {
+    dot.style.background  = "var(--amber)";
+    dot.style.boxShadow   = "0 0 6px var(--amber)";
+    text.style.color      = "var(--amber)";
+    text.textContent      = "⚠ Sin URL — modo demo activo";
+  }
+}
+
+// ── Config panel toggle ───────────────────────────────────────
+let cfgOpen = false;
+function toggleConfig() {
+  cfgOpen = !cfgOpen;
+  const panel = $("cfg-panel");
+  const icon  = $("cfg-toggle-icon");
+  const text  = $("cfg-toggle-text");
+  panel.classList.toggle("open", cfgOpen);
+  if(cfgOpen) {
+    icon.textContent = "✕";
+    text.textContent = "CERRAR CONFIGURACIÓN";
+    const inp = $("cfg-script-url");
+    if(inp){ inp.value = LOGIN_SCRIPT_URL; inp.focus(); }
+  } else {
+    icon.textContent = "⚙";
+    text.textContent = "CONFIGURAR APPS SCRIPT";
+  }
+}
+
+function saveConfig() {
+  const url = ($("cfg-script-url")?.value||"").trim();
+  if(!url || !url.startsWith("https://script.google.com")) {
+    const inp = $("cfg-script-url");
+    if(inp){ inp.style.borderColor="var(--red)"; setTimeout(()=>inp.style.borderColor="",1500); }
+    return;
+  }
+  localStorage.setItem("avsec_login_script", url);
+  LOGIN_SCRIPT_URL = url;
+  const msg = $("cfg-saved-msg");
+  if(msg){ msg.style.display="block"; }
+  updateStatusBar();
+  setTimeout(()=>{
+    if(msg) msg.style.display="none";
+    toggleConfig();
+  }, 1200);
+}
+
+// ── Toggle password visibility ────────────────────────────────
 function togglePass(){
   const inp = $("inp-pass");
   inp.type = inp.type==="password" ? "text" : "password";
 }
 
+// ── Error helpers ─────────────────────────────────────────────
 function showError(msg){
-  const e=$("error-msg"); e.textContent=msg; e.style.display="block";
-  $("inp-user").classList.add("err"); $("inp-pass").classList.add("err");
+  const e=$("error-msg");
+  e.innerHTML = msg.replace(/\n/g,"<br>");
+  e.style.display="block";
+  $("inp-user").classList.add("err");
+  $("inp-pass").classList.add("err");
 }
 function clearError(){
   const e=$("error-msg"); e.style.display="none";
-  $("inp-user").classList.remove("err"); $("inp-pass").classList.remove("err");
+  $("inp-user").classList.remove("err");
+  $("inp-pass").classList.remove("err");
 }
 
+// ── Login ─────────────────────────────────────────────────────
 async function doLogin(){
   clearError();
   const user = ($("inp-user").value||"").trim();
   const pass = ($("inp-pass").value||"").trim();
   if(!user||!pass){ showError("Ingrese usuario y contraseña"); return; }
 
-  const btn = $("login-btn"); const sp = $("spinner");
-  btn.disabled=true; btn.textContent="VERIFICANDO...";
-  sp.style.display="block";
+  const btn = $("login-btn");
+  const sp  = $("spinner");
+  btn.disabled = true;
+  btn.textContent = "VERIFICANDO...";
+  sp.style.display = "block";
 
-  if(!SCRIPT_URL){
-    // Fallback demo credentials
-    if(user==="admin" && pass==="admin123"){
-      onLoginSuccess({username:user,role:"admin",nombre:"Administrador"});
-    } else if(user==="oficial" && pass==="oficial123"){
-      onLoginSuccess({username:user,role:"oficial",nombre:"Oficial Demo"});
+  // ── No URL: demo mode ──────────────────────────────────────
+  if(!LOGIN_SCRIPT_URL) {
+    await new Promise(r=>setTimeout(r,600)); // simulate latency
+    const DEMO = {
+      "admin":    {username:"admin",    role:"admin",      nombre:"Administrador Demo"},
+      "oficial":  {username:"oficial",  role:"oficial",    nombre:"Oficial Demo"},
+      "supervisor":{username:"supervisor",role:"supervisor",nombre:"Supervisor Demo"},
+    };
+    const DEMO_PASS = { "admin":"admin123","oficial":"oficial123","supervisor":"sup123" };
+    if(DEMO[user] && DEMO_PASS[user]===pass) {
+      onLoginSuccess(DEMO[user]);
     } else {
-      showError("Credenciales incorrectas.\n(Configure Apps Script URL en AVSEC PRO → ⚙)");
+      showError(
+        "Credenciales incorrectas.\n" +
+        "Demo: admin / admin123 &nbsp;·&nbsp; oficial / oficial123\n" +
+        '<span style="color:var(--amber)">⚙ Configure su Apps Script con el botón de abajo.</span>'
+      );
+      btn.disabled=false; btn.textContent="⬡ INGRESAR"; sp.style.display="none";
     }
-    btn.disabled=false; btn.textContent="⬡ INGRESAR"; sp.style.display="none";
     return;
   }
 
+  // ── Real login via Apps Script ─────────────────────────────
   try {
-    const res  = await fetch(`${SCRIPT_URL}?action=login&username=${encodeURIComponent(user)}&password=${encodeURIComponent(pass)}`);
+    const url = `${LOGIN_SCRIPT_URL}?action=login` +
+                `&username=${encodeURIComponent(user)}` +
+                `&password=${encodeURIComponent(pass)}` +
+                `&_t=${Date.now()}`;
+    const res  = await fetch(url);
     const data = await res.json();
-    if(data.ok && data.user){
+    if(data.ok && data.user) {
       onLoginSuccess(data.user);
     } else {
       showError(data.error || "Usuario o contraseña incorrectos");
+      btn.disabled=false; btn.textContent="⬡ INGRESAR"; sp.style.display="none";
     }
-  } catch(e){
-    showError("Error de conexión. Verifique la URL del Apps Script.");
-  } finally {
+  } catch(err) {
+    showError(
+      "No se pudo conectar con el Apps Script.\n" +
+      "Verifique la URL o su conexión a internet."
+    );
     btn.disabled=false; btn.textContent="⬡ INGRESAR"; sp.style.display="none";
   }
 }
 
+// ── On success ────────────────────────────────────────────────
 function onLoginSuccess(user){
-  // Save session
-  localStorage.setItem("avsec_user", JSON.stringify(user));
+  localStorage.setItem("avsec_user",       JSON.stringify(user));
   localStorage.setItem("avsec_login_time", new Date().toISOString());
 
-  // Visual feedback before redirect
-  const btn=$("login-btn");
-  btn.style.background="var(--neon)"; btn.style.color="#001a00";
-  btn.textContent="✓ ACCESO CONCEDIDO";
+  const btn = $("login-btn");
+  btn.style.background = "var(--neon)";
+  btn.style.color      = "#001a00";
+  btn.textContent      = "✓ ACCESO CONCEDIDO";
 
   setTimeout(()=>{
-    // Redirect based on role
-    if(user.role==="admin" || user.role==="supervisor"){
+    if(user.role==="admin" || user.role==="supervisor") {
       window.location.href = "AVSEC_Dashboard.html";
     } else {
       window.location.href = "AVSEC_PRO_OCR_fixed.html";
     }
-  }, 900);
+  }, 800);
 }
 
-// Auto-focus
+// ── Init ─────────────────────────────────────────────────────
 window.onload = () => {
-  // If already logged in, redirect
-  const saved = localStorage.getItem("avsec_user");
-  if(saved){
-    try {
-      const u = JSON.parse(saved);
-      if(u && u.username) {
-        const loginTime = new Date(localStorage.getItem("avsec_login_time")||0);
-        const hours = (new Date() - loginTime) / 3600000;
-        if(hours < 12) { onLoginSuccess(u); return; }
-      }
-    } catch(e){}
+  // Check existing session
+  try {
+    const saved = localStorage.getItem("avsec_user");
+    if(saved) {
+      const u   = JSON.parse(saved);
+      const age = (new Date() - new Date(localStorage.getItem("avsec_login_time")||0)) / 3600000;
+      if(u?.username && age < 12) { onLoginSuccess(u); return; }
+    }
+  } catch(e){}
+
+  updateStatusBar();
+
+  // Pre-fill URL field if already set
+  const urlInp = $("cfg-script-url");
+  if(urlInp && LOGIN_SCRIPT_URL) urlInp.value = LOGIN_SCRIPT_URL;
+
+  // Auto-open config if URL is not set
+  if(!LOGIN_SCRIPT_URL) {
+    setTimeout(()=> toggleConfig(), 400);
   }
+
   $("inp-user").focus();
 };
 </script>
