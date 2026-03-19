@@ -333,9 +333,9 @@ function onLoginSuccess(user){
 
   setTimeout(()=>{
     if(user.role==="admin" || user.role==="supervisor") {
-      window.location.href = "AVSEC_Dashboard.html";
+      window.location.href = "history.html";
     } else {
-      window.location.href = "AVSEC_PRO_OCR_fixed.html";
+      window.location.href = "index.html";
     }
   }, 800);
 }
